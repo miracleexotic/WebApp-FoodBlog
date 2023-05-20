@@ -4,8 +4,8 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import Navbar from './Navbar';
-import Home from './Home';
+import Navbar from './App/Navbar';
+import Home from './App/Home';
 
 function AppRouter() {
   const router = createBrowserRouter([
