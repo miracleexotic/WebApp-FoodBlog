@@ -1,11 +1,12 @@
 import AppRouter from './components/AppRouter';
+import AuthRouter from './components/AuthRouter';
 
 function App() {
-  const token = true;
+  const token = localStorage.getItem('token');
 
   return (
     <div>
-      {token ? (<AppRouter />) : (<div>Sign In</div>)}
+      {token ? (<AppRouter />) : (<AuthRouter />)}
     </div>
   );
 }
