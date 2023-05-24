@@ -38,9 +38,9 @@ function Navbar() {
   };
 
   const settings = [
-    {title: 'Profile', onClick: handleCloseUserMenu},
-    {title: 'Settings', onClick: handleCloseUserMenu},
-    {title: 'Log out', onClick: () => {localStorage.clear(); window.location.reload();}}
+    {title: 'Profile', onClick: () => {window.location.href = '/profile';}},
+    {title: 'Settings', onClick: () => {window.location.href = '/setting';} },
+    {title: 'Log out', onClick: () => {localStorage.clear(); window.location.href = '/';}}
   ];
 
   return (
@@ -68,14 +68,16 @@ function Navbar() {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button
-                key="Add Post"
-                variant="contained"
-                startIcon={<AddIcon />}
-                color='secondary'
-            >
-              Add Post
-            </Button>
+            <a href="/add" >
+              <Button
+                  key="Add Post"
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  color='secondary'
+              >
+                Add Post
+              </Button>
+            </a>
           </Box>
 
           <Box sx={{ marginRight: 1 }}>
