@@ -18,7 +18,7 @@ const theme = createTheme({
   },
 });
 
-function SignUp() {
+function SignUpPage() {
   const commonStyles = {
     bgcolor: 'background.paper',
     borderColor: 'text.primary',
@@ -92,4 +92,4 @@ function SignUp() {
     </div>
   );
 }
-export default SignUp;
+export default SignUpPage;

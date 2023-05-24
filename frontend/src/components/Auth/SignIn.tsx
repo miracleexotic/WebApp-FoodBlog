@@ -18,7 +18,7 @@ const theme = createTheme({
   },
 });
 
-function SignIn() {
+function SignInPage() {
   const commonStyles = {
     bgcolor: 'background.paper',
     borderColor: 'text.primary',
@@ -96,4 +96,4 @@ function SignIn() {
     </div>
   );
 }
-export default SignIn;
+export default SignInPage;

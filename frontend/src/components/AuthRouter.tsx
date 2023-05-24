@@ -4,18 +4,18 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import SignIn from './Auth/SignIn';
-import SignUp from './Auth/SignUp';
+import SignInPage from './Auth/SignIn';
+import SignUpPage from './Auth/SignUp';
 
 function AuthRouter() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <SignIn />,
+      element: <SignInPage />,
     },
     {
         path: "/register",
-        element: <SignUp />
+        element: <SignUpPage />
     }
   ]);
 
