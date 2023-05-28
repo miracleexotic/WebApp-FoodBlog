@@ -6,10 +6,9 @@ import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { grey, pink } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import Moment from 'moment';
 
-import { UserInterface } from '../../models/IUser';
 import { PostInterface } from '../../models/IPost';
 
 
@@ -29,9 +28,11 @@ function PostComponent(props: DataPostInterface) {
     borderRadius: '16px'
   };
 
+  const [previewImage, setPreviewImage] = React.useState<string>("/static/images/avatar/2.jpg");
+
   const [likeToggle, setLikeToggle] = React.useState(false);
   const [likeColor, setLikeColor] = React.useState('grey');
-  const [countLike, setCountLike] = React.useState(10);
+  const [countLike, setCountLike] = React.useState(0);
 
   const onLikeClick = (e: React.MouseEvent<HTMLElement>) => {
     setLikeToggle((likeToggle) => {
@@ -39,14 +40,14 @@ function PostComponent(props: DataPostInterface) {
       if (likeToggle) {
         setCountLike((countLike) => {
           const newCountLike = countLike + 1;
-          setLike(newCountLike);
+          setLike();
           return newCountLike;
         });
         setLikeColor('pink');
       } else {
         setCountLike((countLike) => {
           const newCountLike = countLike - 1;
-          setLike(newCountLike);
+          setLike();
           return newCountLike;
         });
         setLikeColor('grey');
@@ -55,12 +56,72 @@ function PostComponent(props: DataPostInterface) {
     });
   }
 
-  function setLike(like: number) {
-    console.log(like);
+  function setLike() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/user/${localStorage.getItem("id")}/post/${props.Post.ID}`;
+    const requestOptions = {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
   }
 
   function getLike() {
-    setCountLike(countLike)
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/post/${props.Post.ID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setCountLike(res.data.length)
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
+  }
+
+  function isUserLikePost() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/user/${localStorage.getItem("id")}/post/${props.Post.ID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setLikeToggle(true)
+          setLikeColor('pink')
+          // setSuccess(true);
+        } else {
+          setLikeToggle(false)
+          setLikeColor('grey')
+          // setError(true);
+        }
+    });
   }
 
   function handleReadMore() {
@@ -68,7 +129,11 @@ function PostComponent(props: DataPostInterface) {
   }
 
   React.useEffect(() => {
+    if (props.Post.Author.Image != "") {
+      setPreviewImage(props.Post.Author.Image)
+    }
     getLike()
+    isUserLikePost()
   }, [])
 
   return (
@@ -76,7 +141,7 @@ function PostComponent(props: DataPostInterface) {
       <Box sx={{ ...commonStyles }}>
         <Box sx={{ display: 'flex' }}>
           <IconButton sx={{ p: 0 }}>
-            <Avatar alt={props.Post.Author.Username} src="/static/images/avatar/2.jpg" />
+            <Avatar alt={props.Post.Author.Username} src={previewImage} />
           </IconButton>
           <Box>
             <Typography variant='subtitle1' sx={{ marginLeft: 1 }}>
@@ -117,56 +182,40 @@ function PostComponent(props: DataPostInterface) {
 }
 
 function HomePage() {
-  const commonStyles = {
-    bgcolor: 'background.paper',
-    borderColor: 'text.primary',
-    width: '700px',
-    height: '250px',
-    boxShadow: '1px 2px 9px #9999',
-    margin: '2em',
-    padding: '1em',
-    borderRadius: '16px'
-  };
 
-  const user: UserInterface = {
-    ID: 1,
-    Email: "mai.nutthawat@gmail.com",
-    Username: "Nutthawat Boonsodakorn",
-    Password: "test",
-    Image: "test"
+  const [posts, setPosts] = React.useState<PostInterface[]>([]);
+
+  function getPosts() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/posts`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setPosts(res.data)
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
   }
 
-  const datas: PostInterface[] = [{
-      ID: 1,
-      Title: "Heading",
-      Subject: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor",
-      Image: "string",
-      Create_at: new Date,
-      Author: user
-    },
-    {
-      ID: 2,
-      Title: "Heading",
-      Subject: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      Image: "string",
-      Create_at: new Date,
-      Author: user
-    },
-    {
-      ID: 3,
-      Title: "Heading",
-      Subject: "Lorem ipsum dolor sit amet, consectetur adipisicing elit,  Lorem ipsum dolor sit amet",
-      Image: "string",
-      Create_at: new Date,
-      Author: user
-    },
-  ]
+  React.useEffect(() => {
+    getPosts()
+  }, [])
 
   return (
     <Container sx={{ display: 'flex', justifyContent: 'center' }}>
       <Box sx={{ display: 'block', justifyContent: 'center' }}>
 
-          {datas.map((data: PostInterface) => 
+          {posts.map((data: PostInterface) => 
             <PostComponent Post={data}  />
           )}
 

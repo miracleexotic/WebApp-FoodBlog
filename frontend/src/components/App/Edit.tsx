@@ -11,6 +11,9 @@ import { grey, blue, pink } from '@mui/material/colors';
 import { useParams } from "react-router-dom";
 import Moment from 'moment';
 
+import { UserInterface } from '../../models/IUser';
+import { PostInterface } from '../../models/IPost';
+
 
 const theme = createTheme({
   palette: {
@@ -35,7 +38,6 @@ function EditPage() {
   };
 
   const { editID } = useParams();
-  console.log(editID)
 
   const [currentImage, setCurrentImage] = React.useState<{name: string}>();
   const [previewImage, setPreviewImage] = React.useState<string>("");
@@ -46,6 +48,114 @@ function EditPage() {
     setPreviewImage(URL.createObjectURL(selectedFiles?.[0]));
   };
 
+  function handlePublicClick() {
+    fetch(previewImage)
+        .then((res) => res.blob())
+        .then((blob) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+
+                let data = {
+                  ...post,
+                  Image: reader.result
+                };
+            
+                const apiUrl = `${process.env.REACT_APP_BACKEND_API}/post/${editID}`;
+                const requestOptions = {
+                  method: "PATCH",
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(data),
+                };
+            
+                fetch(apiUrl, requestOptions)
+                  .then((response) => response.json())
+                  .then((res) => {
+                    if (res.data) {
+                      window.location.href = "/profile"
+                      // setSuccess(true);
+                    } else {
+                      // setError(true);
+                    }
+                  });
+            };
+            reader.readAsDataURL(blob);
+        });
+  }
+
+  const [post, setPost] = React.useState<Partial<PostInterface>>({});
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const id = e.target.id as keyof typeof user;
+    const { value } = e.target;
+    setPost({...post, [id]: value});
+  }
+
+  const [user, setUser] = React.useState<UserInterface>();
+  const [previewAuthorImage, setPreviewAuthorImage] = React.useState<string>("");
+
+  function getUser() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/user/${localStorage.getItem('id')}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setUser((user) => {
+            if (res.data.Image != "") {
+              setPreviewAuthorImage(res.data.Image);
+            }
+            return {...user, ...res.data}
+          })
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
+  }
+
+  function getPost() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/post/${editID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setPost((post) => {
+            if (res.data.Image != "") {
+              setPreviewImage(res.data.Image);
+            }
+            setPost({...post, Title: res.data.Title, Subject: res.data.Subject})
+            return res.data
+          })
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
+  }
+
+  React.useEffect(() => {
+    getUser();
+    getPost();
+  }, []);
+
   return (
     <Container sx={{ display: 'flex', justifyContent: 'center' }}>
       <Box sx={{ display: 'block', justifyContent: 'center' }}>
@@ -53,11 +163,11 @@ function EditPage() {
         <Box sx={{ ...commonStyles }}>
           <Box sx={{ display: 'flex' }}>
             <IconButton sx={{ p: 0 }}>
-              <Avatar alt="Nutthawat Boonsodakorn" src="/static/images/avatar/2.jpg" />
+              <Avatar alt={user?.Username} src={previewAuthorImage} />
             </IconButton>
             <Box>
               <Typography variant='subtitle1' sx={{ marginLeft: 1 }}>
-                Nutthawat Boonsodakorn
+                {user?.Username}
               </Typography>
               <Typography variant='body2' sx={{ marginLeft: 1 }} color={ grey[500] }>
                 {Moment(new Date).format('D MMM YYYY HH:mm')}
@@ -70,6 +180,7 @@ function EditPage() {
                   size="small"
                   sx={{ height: 30 }}
                   color='secondary'
+                  onClick={handlePublicClick}
                 >
                   Save
                 </Button>
@@ -78,22 +189,22 @@ function EditPage() {
           </Box>
           <Box >
             <TextField 
-              id="title" 
-              label="Title" 
-              placeholder="Enter your title."
+              id="Title" 
+              value={post.Title}
               fullWidth
               sx={{ marginTop: 3 }}
+              onChange={handleInputChange}
             />
           </Box>
           <Box >
             <TextField
-              id="subject"
-              label="Subject"
-              placeholder="Tell your story."
+              id="Subject"
+              value={post.Subject}
               multiline
               fullWidth
               rows={10} 
               sx={{ marginTop: 1 }}
+              onChange={handleInputChange}
             />
           </Box>
           <Box sx={{ marginTop: 1 }}>

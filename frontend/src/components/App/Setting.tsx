@@ -8,6 +8,9 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { grey, blue, pink } from '@mui/material/colors';
+import Moment from 'moment';
+
+import { UserInterface } from '../../models/IUser';
 
 
 const theme = createTheme({
@@ -32,8 +35,6 @@ function SettingPage() {
     borderRadius: '16px'
   };
 
-  const [username, setUsername] = React.useState("Nutthawat Boonsodakorn");
-
   const [currentImage, setCurrentImage] = React.useState<{name: string}>();
   const [previewImage, setPreviewImage] = React.useState<string>("/static/images/avatar/2.jpg");
   
@@ -43,6 +44,83 @@ function SettingPage() {
     setPreviewImage(URL.createObjectURL(selectedFiles?.[0]));
   };
 
+  function handleSaveClick() {
+    fetch(previewImage)
+        .then((res) => res.blob())
+        .then((blob) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+
+                let data = {
+                  ...user,
+                  Image: reader.result
+                };
+            
+                const apiUrl = `${process.env.REACT_APP_BACKEND_API}/user/${localStorage.getItem('id')}`;
+                const requestOptions = {
+                  method: "PATCH",
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(data),
+                };
+            
+                fetch(apiUrl, requestOptions)
+                  .then((response) => response.json())
+                  .then((res) => {
+                    if (res.data) {
+                      window.location.reload();
+                      // setSuccess(true);
+                    } else {
+                      // setError(true);
+                    }
+                  });
+            };
+            reader.readAsDataURL(blob);
+        });
+
+  }
+
+  const [user, setUser] = React.useState<Partial<UserInterface>>({});
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const id = e.target.id as keyof typeof user;
+    const { value } = e.target;
+    setUser({...user, [id]: value});
+  }
+
+  function getUser() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/user/${localStorage.getItem('id')}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setUser((user) => {
+            if (res.data.image != "") {
+              setPreviewImage(res.data.Image);
+            }
+            return {...user, ...res.data}
+          })
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
+  }
+
+  React.useEffect(() => {
+    getUser();
+  }, []);
+
   return (
     <Container sx={{ display: 'flex', justifyContent: 'center' }}>
       <Box sx={{ display: 'block', justifyContent: 'center' }}>
@@ -50,28 +128,26 @@ function SettingPage() {
         <Box sx={{ ...commonStyles }}>
           <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 3, marginBottom: 6 }}>
             <IconButton sx={{ p: 0 }}>
-              <Avatar alt={username} src={previewImage} />
+              <Avatar alt={user.Username} src={previewImage} />
             </IconButton>
             <Box>
               <Typography variant='subtitle1' sx={{ marginLeft: 1 }}>
-                {username}
+                {user.Username}
               </Typography>
               <Typography variant='body2' sx={{ marginLeft: 1 }} color={ grey[500] }>
-                14 May 2023 00:32
+                {Moment(new Date).format('D MMM YYYY HH:mm')}
               </Typography>
             </Box>
           </Box>
           <Box sx={{ marginTop: 1 }}>
             <TextField 
               id="Username" 
-              label="Username" 
+              // label="Username" 
               placeholder="Enter new username."
-              value={username}
+              value={user.Username}
               fullWidth
               sx={{ marginTop: 1 }}
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
+              onChange={handleInputChange}
             />
           </Box>
           <Box sx={{ marginTop: 1 }}>
@@ -90,6 +166,7 @@ function SettingPage() {
                 sx={{ height: 30 }}
                 color='secondary'
                 fullWidth
+                onClick={handleSaveClick}
               >
                 Save
               </Button>

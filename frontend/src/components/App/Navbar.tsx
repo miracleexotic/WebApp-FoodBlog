@@ -14,6 +14,7 @@ import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AddIcon from '@mui/icons-material/Add';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { pink, blue } from '@mui/material/colors';
+import { UserInterface } from '../../models/IUser';
 
 const theme = createTheme({
   palette: {
@@ -36,6 +37,40 @@ function Navbar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const [user, setUser] = React.useState<Partial<UserInterface>>({});
+  const [previewImage, setPreviewImage] = React.useState<string>("/static/images/avatar/2.jpg");
+
+  function getUser() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/user/${localStorage.getItem('id')}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setUser((user) => {
+            if (res.data.Image != "") {
+              setPreviewImage(res.data.Image)
+            }
+            return {...user, ...res.data}
+          })
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
+  }
+
+  React.useEffect(() => {
+    getUser();
+  }, []);
 
   const settings = [
     {title: 'Profile', onClick: () => {window.location.href = '/profile';}},
@@ -82,14 +117,14 @@ function Navbar() {
 
           <Box sx={{ marginRight: 1 }}>
             <Typography variant='subtitle1'>
-              Nutthawat Boonsodakorn
+              {user.Username}
             </Typography>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Nutthawat Boonsodakorn" src="/static/images/avatar/2.jpg" />
+                <Avatar alt={user.Username} src={previewImage} />
               </IconButton>
             </Tooltip>
             <Menu

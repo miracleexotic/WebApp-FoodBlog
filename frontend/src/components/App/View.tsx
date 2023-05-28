@@ -11,7 +11,7 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import TextField from '@mui/material/TextField';
-import { grey, pink } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import { useParams } from "react-router-dom";
 import Moment from 'moment';
 
@@ -34,12 +34,17 @@ function CommentComponent(props: DataCommentInterface) {
     borderRadius: '16px'
   };
 
+  const [previewImage, setPreviewImage] = React.useState<string>("/static/images/avatar/2.jpg");
+
   const [likeToggle, setLikeToggle] = React.useState<{normal: boolean, smile: boolean, very: boolean}>({normal: false, smile: false, very: false});
   const [likeColor, setLikeColor] = React.useState<{normal: string, smile: string, very: string}>({normal: 'grey', smile: 'grey', very: 'grey'});
-  const [countLike, setCountLike] = React.useState<{normal: number, smile: number, very: number}>({normal: 10, smile: 10, very: 10});
+  const [countLike, setCountLike] = React.useState<{normal: number, smile: number, very: number}>({normal: 0, smile: 0, very: 0});
+
+  const [activeUserCurrentEmote, setActiveUserCurrentEmote] = React.useState("");
 
   const onLikeClick = (e: React.MouseEvent<HTMLElement>) => {
     if (e.currentTarget.id === "normal") {
+      setEmotion(activeUserCurrentEmote, "normal")
       setLikeToggle((likeToggle) => {
         const newlikeToggle = {
           normal: !likeToggle.normal,
@@ -65,6 +70,7 @@ function CommentComponent(props: DataCommentInterface) {
         return {...likeToggle, ...newlikeToggle};
       })
     } else if (e.currentTarget.id === "smile") {
+      setEmotion(activeUserCurrentEmote, "smile")
       setLikeToggle((likeToggle) => {
         const newlikeToggle = {
           normal: false,
@@ -90,6 +96,7 @@ function CommentComponent(props: DataCommentInterface) {
         return {...likeToggle, ...newlikeToggle};
       })
     } else if (e.currentTarget.id === "very") {
+      setEmotion(activeUserCurrentEmote, "very")
       setLikeToggle((likeToggle) => {
         const newlikeToggle = {
           normal: false,
@@ -117,12 +124,96 @@ function CommentComponent(props: DataCommentInterface) {
     }
   }
 
-  function getLike() {
-    setCountLike({...countLike, normal: 10, smile: 10, very: 10});
+  function setEmotion(emote_prev: string, emote_curr: string) {
+    let data = {
+      Name_prev: emote_prev,
+      Name_curr: emote_curr,
+    };
+
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/emotion/comment/${props.Comment.ID}/active`;
+    const requestOptions = {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setActiveUserCurrentEmote(emote_curr)
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
+  }
+
+  function getEmotions() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/emotion/comment/${props.Comment.ID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setCountLike({...countLike, normal: res.data.Normal, smile: res.data.Smile, very: res.data.Very});
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
+  }
+
+  function isUserEmotionComment() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/emotion/comment/${props.Comment.ID}/active`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          if (res.data.Emotional.Name == 'normal') {
+            setLikeToggle({...likeToggle, normal: true})
+            setLikeColor({...likeColor, normal: 'pink'})
+            setActiveUserCurrentEmote('normal')
+          } else if (res.data.Emotional.Name == 'smile') {
+            setLikeToggle({...likeToggle, smile: true})
+            setLikeColor({...likeColor, smile: 'pink'})
+            setActiveUserCurrentEmote('smile')
+          } else if (res.data.Emotional.Name == 'very') {
+            setLikeToggle({...likeToggle, very: true})
+            setLikeColor({...likeColor, very: 'pink'})
+            setActiveUserCurrentEmote('very')
+          }
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
   }
 
   React.useEffect(() => {
-    getLike();
+    if (props.Comment.UserComment.Image != "") {
+      setPreviewImage(props.Comment.UserComment.Image)
+    }
+    getEmotions();
+    isUserEmotionComment();
   }, []);
 
   return (
@@ -130,7 +221,7 @@ function CommentComponent(props: DataCommentInterface) {
       <Box sx={{ ...commonStyles, marginTop: -2 }}>
         <Box sx={{ display: 'flex' }}>
           <IconButton sx={{ p: 0 }}>
-            <Avatar alt={props.Comment.UserComment.Username} src="/static/images/avatar/2.jpg" />
+            <Avatar alt={props.Comment.UserComment.Username} src={previewImage} />
           </IconButton>
           <Box sx={{ display: 'flex', marginTop: 1 }}>
             <Typography variant='subtitle1' sx={{ marginLeft: 1 }}>
@@ -194,55 +285,74 @@ function ViewPage() {
   };
 
   const { viewID } = useParams();
-  console.log(viewID)
 
-  const dataUser: UserInterface = {
-    ID: 1,
-    Email: "mai.nutthawat@gmail.com",
-    Username: "Nutthawat Boonsodakorn",
-    Password: "test",
-    Image: "test"
+  const [user, setUser] = React.useState<Partial<UserInterface>>({});
+  const [previewImage, setPreviewImage] = React.useState<string>("/static/images/avatar/2.jpg");
+
+  function getUser() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/user/${localStorage.getItem('id')}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setUser((user) => {
+            if (res.data.Image != "") {
+              setPreviewImage(res.data.Image)
+            }
+            return {...user, ...res.data}
+          })
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
   }
 
-  const dataPost: PostInterface = {
-    ID: 1,
-    Title: "Heading",
-    Subject: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor",
-    Image: "string",
-    Create_at: new Date,
-    Author: dataUser
+  const [post, setPost] = React.useState<PostInterface>();
+  const [previewPostAuthorImage, setPreviewPostAuthorImage] = React.useState<string>("/static/images/avatar/2.jpg");
+  const [previewPostImage, setPreviewPostImage] = React.useState<string>("");
+
+  function getPost() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/post/${viewID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setPost((post) => {
+            if (res.data.Author.Image != "") {
+              setPreviewPostAuthorImage(res.data.Author.Image);
+            }
+            if (res.data.Image != "") {
+              setPreviewPostImage(res.data.Image);
+            }
+            return res.data
+          })
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
   }
-
-  const dataComment: CommentPostInterface[] = [
-    {
-      ID: 1,
-      Comment: "Lorem ipsum dolor sit amet, consectetur adipisicing elit.",
-      Create_at: new Date,
-      Post: dataPost,
-      UserComment: dataUser
-
-    },
-    {
-      ID: 2,
-      Comment: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor",
-      Create_at: new Date,
-      Post: dataPost,
-      UserComment: dataUser
-
-    },
-    {
-      ID: 3,
-      Comment: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor",
-      Create_at: new Date,
-      Post: dataPost,
-      UserComment: dataUser
-
-    },
-  ]
 
   const [likeToggle, setLikeToggle] = React.useState(false);
   const [likeColor, setLikeColor] = React.useState('grey');
-  const [countLike, setCountLike] = React.useState(10);
+  const [countLike, setCountLike] = React.useState(0);
 
   const onLikeClick = (e: React.MouseEvent<HTMLElement>) => {
     setLikeToggle((likeToggle) => {
@@ -250,14 +360,14 @@ function ViewPage() {
       if (likeToggle) {
         setCountLike((countLike) => {
           const newCountLike = countLike + 1;
-          setLike(newCountLike);
+          setLike();
           return newCountLike;
         });
         setLikeColor('pink');
       } else {
         setCountLike((countLike) => {
           const newCountLike = countLike - 1;
-          setLike(newCountLike);
+          setLike();
           return newCountLike;
         });
         setLikeColor('grey');
@@ -266,12 +376,96 @@ function ViewPage() {
     });
   }
 
-  function setLike(like: number) {
-    console.log(like);
+  function setLike() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/user/${localStorage.getItem("id")}/post/${viewID}`;
+    const requestOptions = {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
   }
 
   function getLike() {
-    setCountLike(countLike);
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/post/${viewID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setCountLike(res.data.length)
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
+  }
+
+  function isUserLikePost() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/user/${localStorage.getItem("id")}/post/${viewID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setLikeToggle(true)
+          setLikeColor('pink')
+          // setSuccess(true);
+        } else {
+          setLikeToggle(false)
+          setLikeColor('grey')
+          // setError(true);
+        }
+    });
+  }
+
+  const [comments, setComments] = React.useState<CommentPostInterface[]>([]);
+
+  function getCommentPosts() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/comment/post/${viewID}`;
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          setComments(res.data)
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
   }
 
   const [editComment, setEditComment] = React.useState("");
@@ -282,28 +476,55 @@ function ViewPage() {
   })
 
   function onClickComment() {
-    console.log(editComment);
+    let data = {
+      Comment: editComment,
+    }
+
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/comment/post/${post?.ID}`;
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          window.location.reload()
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+    });
   }
 
   React.useEffect(() => {
+    getUser();
+    getPost();
     getLike();
+    isUserLikePost();
+    getCommentPosts();
   }, []);
  
   return (
-    <Container sx={{ display: 'flex', justifyContent: 'center' }}>
-      <Box sx={{ display: 'block', justifyContent: 'center' }}>
+    <Container sx={{ display: 'flex', justifyContent: 'center' }} >
+      <Box sx={{ display: 'block', justifyContent: 'center', width: "100%" }} >
 
         <Box sx={{ margin: '2em', padding: '1em' }}>
           <Box sx={{ display: 'flex' }}>
             <IconButton sx={{ p: 0 }}>
-              <Avatar alt={dataPost.Author.Username} src="/static/images/avatar/2.jpg" />
+              <Avatar alt={post?.Author.Username} src={previewPostAuthorImage} />
             </IconButton>
             <Box>
               <Typography variant='subtitle1' sx={{ marginLeft: 1 }}>
-                {dataPost.Author.Username}
+                {post?.Author.Username}
               </Typography>
               <Typography variant='body2' sx={{ marginLeft: 1 }} color={ grey[500] }>
-                {Moment(dataPost.Create_at).format('D MMM YYYY HH:mm')}
+                {Moment(post?.Create_at).format('D MMM YYYY HH:mm')}
               </Typography>
             </Box>
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
@@ -319,11 +540,14 @@ function ViewPage() {
             </Box>
           </Box>
           <Typography variant='h4' sx={{ marginTop: 3, marginBottom: 1 }}>
-            {dataPost.Title}
+            {post?.Title}
           </Typography>
           <Typography variant='body1' >
-            {dataPost.Subject}  
+            {post?.Subject}  
           </Typography>
+          <Box sx={{ marginTop: 1, width: 2 }}>
+            <img width="200" src={previewPostImage} />
+          </Box>
         </Box>
 
         <Box sx={{ marginLeft: '2em' }}>
@@ -335,11 +559,11 @@ function ViewPage() {
         <Box sx={{ ...commonStyles, marginTop: 0.5, maxHeight: "100%", overflow: "auto" }}>
           <Box sx={{ display: 'flex' }}>
             <IconButton sx={{ p: 0 }}>
-              <Avatar alt={dataUser.Username} src="/static/images/avatar/2.jpg" />
+              <Avatar alt={user.Username} src={previewImage} />
             </IconButton>
             <Box sx={{ display: 'flex', marginTop: 1 }}>
               <Typography variant='subtitle1' sx={{ marginLeft: 1 }}>
-                {dataUser.Username}
+                {user.Username}
               </Typography>
               <Typography variant='body2' sx={{ marginLeft: 1, marginTop: '5px' }} color={ grey[500] }>
                 {Moment(new Date).format('D MMM YYYY HH:mm')}
@@ -367,7 +591,7 @@ function ViewPage() {
           />
         </Box>
 
-        {dataComment.map((comment: CommentPostInterface) => 
+        {comments.map((comment: CommentPostInterface) => 
           <CommentComponent Comment={comment} />
         )}
 

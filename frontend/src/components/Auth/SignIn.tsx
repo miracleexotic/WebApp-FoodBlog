@@ -7,6 +7,8 @@ import TextField from '@mui/material/TextField';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { pink, blue } from '@mui/material/colors';
 
+import { UserInterface } from '../../models/IUser';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -30,6 +32,43 @@ function SignInPage() {
     borderRadius: '16px'
   };
 
+  const [user, setUser] = React.useState<Partial<UserInterface>>({});
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const id = e.target.id as keyof typeof user;
+    const { value } = e.target;
+    setUser({...user, [id]: value});
+  }
+
+  function handleSignInClick() {
+    let data = {
+      Email: user.Email ?? "",
+      Password: user.Password ?? "",
+    };
+
+    const apiUrl = process.env.REACT_APP_BACKEND_API+'/signin';
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          localStorage.setItem('token', res.data.token)
+          localStorage.setItem('id', res.data.id)
+          window.location.href = "/"
+          // setSuccess(true);
+        } else {
+          // setError(true);
+        }
+      });
+  }
+
   return (
     <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
     <Container sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -42,33 +81,32 @@ function SignInPage() {
           Email
         </Typography>
         <TextField 
-          id="email" 
+          id="Email" 
           // label="Email" 
           variant="outlined" 
           sx={{ display: 'flex' }}
           required
+          onChange={handleInputChange}
         />
 
         <Typography variant='subtitle1' sx={{ marginTop: 1 }}>
           Password
         </Typography>
         <TextField 
-          id="password" 
+          id="Password" 
           // label="Password" 
           variant="outlined" 
           sx={{ display: 'flex' }}
           type="password"
           required
+          onChange={handleInputChange}
         />
         
         <ThemeProvider theme={theme}>
           <Box sx={{ display: 'flex', justifyContent: 'center', margin: 3 }}>
             <Button 
               variant="contained"
-              onClick={() => {
-                localStorage.setItem('token', 'value');
-                window.location.reload();
-              }}
+              onClick={handleSignInClick}
             >
               SIGN IN
             </Button>
