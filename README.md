@@ -2,14 +2,14 @@
 _Web Application for Food Blog._
 ## Installation
 ##### Node.js (v14.17.5) & npm (v9.6.6)
-![Download and Install](https://nodejs.org/en/download)
+[Download and Install](https://nodejs.org/en/download)
 ```sh
 cd path/to/frontend
 npm install
 ```
 
 ##### Golang (version go1.20 windows/amd64)
-![Download and Install](https://go.dev/doc/install)
+[Download and Install](https://go.dev/doc/install)
 ```sh
 cd path/to/backend
 ```
