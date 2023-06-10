@@ -44,7 +44,6 @@ func SignUp(c *gin.Context) {
 		return
 	}
 	user.Password = string(bytes)
-	user.Username = user.Email
 
 	if err := entity.DB().Create(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -57,16 +56,44 @@ func SignUp(c *gin.Context) {
 // PATCH /user/:id
 // Update user metadata with id.
 func UpdateUser(c *gin.Context) {
-	var user entity.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	email, _ := c.Get("email")
+
+	type payload struct {
+		User        entity.User
+		NewPassword string
+	}
+
+	var data payload
+	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := entity.DB().Model(entity.User{}).Where("id = ?", user.ID).Updates(&user).Error; err != nil {
+	var user entity.User
+	if err := entity.DB().Model(entity.User{}).Where("email = ?", email).First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// ตรวจสอบรหัสผ่าน
+	if data.User.Password != "" {
+		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.User.Password))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user old credentials"})
+			return
+		}
+
+		newPassword, _ := bcrypt.GenerateFromPassword([]byte(data.NewPassword), 14)
+		data.User.Password = string(newPassword)
+	}
+
+	if err := entity.DB().Model(entity.User{}).Where("email = ?", email).Updates(&data.User).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
+
+// j, _ := json.MarshalIndent(data.User, "", "    ")
+// fmt.Println(string(j))
