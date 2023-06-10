@@ -4,8 +4,8 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import SignInPage from './Auth/SignIn';
-import SignUpPage from './Auth/SignUp';
+import SignInPage from './Pages/Auth/SignIn';
+import SignUpPage from './Pages/Auth/SignUp';
 
 function AuthRouter() {
   const router = createBrowserRouter([
