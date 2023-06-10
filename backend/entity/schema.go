@@ -8,10 +8,14 @@ import (
 
 type User struct {
 	gorm.Model
-	Email    string `gorm:"uniqueIndex"`
-	Username string
-	Password string `json:"-"`
-	Image    string
+	Email     string `gorm:"uniqueIndex"`
+	Username  string
+	Password  string
+	Firstname string
+	Lastname  string
+	Birthdate time.Time
+	Career    string
+	Image     string
 
 	// 1 user เป็นเจ้าของได้หลาย post
 	Posts []Post `gorm:"foreignKey:AuthorID"`
@@ -29,19 +33,31 @@ type User struct {
 type Post struct {
 	gorm.Model
 	Title     string
+	Preview   string
 	Subject   string
-	Image     string
 	Create_at time.Time
 
 	// AuthorID ทำหน้าที่เป็น FK
 	AuthorID *uint
 	Author   User `gorm:"references:id"`
 
+	// CategoryID ทำหน้าที่เป็น FK
+	CategoryID *uint
+	Category   Category `gorm:"references:id"`
+
 	// 1 post สามารถถูกใจได้หลาย likePost
 	Likes []LikePost `gorm:"foreignKey:PostID"`
 
 	// 1 post สามารถคอมเมนต์ได้หลาย commentPost
 	Comments []CommentPost `gorm:"foreignKey:PostID"`
+}
+
+type Category struct {
+	gorm.Model
+	Name string
+
+	// 1 category สามารถมีได้หลาย post
+	Posts []Post `gorm:"foreignKey:CategoryID"`
 }
 
 type LikePost struct {
