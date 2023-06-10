@@ -36,48 +36,85 @@ func SetupDatabase() {
 
 	// Data::User
 	user01 := User{
-		Email:    "cherry.chadchada@gmail.com",
-		Username: "Cherry Chadchada",
-		Password: string(password),
-		Image:    "",
+		Email:     "cherry.chadchada@gmail.com",
+		Username:  "Cherry Chadchada",
+		Password:  string(password),
+		Firstname: "Cherry",
+		Lastname:  "Chadchada",
+		Birthdate: time.Date(1999, 6, 7, 0, 0, 0, 0, time.Local),
+		Career:    "Engineer",
+		Image:     "",
 	}
 	user02 := User{
-		Email:    "example.example@example.com",
-		Username: "example example",
-		Password: string(password),
-		Image:    "",
+		Email:     "example.example@example.com",
+		Username:  "example example",
+		Password:  string(password),
+		Firstname: "Example",
+		Lastname:  "Example",
+		Birthdate: time.Date(2003, 3, 3, 0, 0, 0, 0, time.Local),
+		Career:    "Teacher",
+		Image:     "",
 	}
 	user03 := User{
-		Email:    "test.test@test.com",
-		Username: "test test",
-		Password: string(password),
-		Image:    "",
+		Email:     "test.test@test.com",
+		Username:  "test test",
+		Password:  string(password),
+		Firstname: "Test",
+		Lastname:  "Test",
+		Birthdate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.Local),
+		Career:    "Tester",
+		Image:     "",
 	}
 	db.Model(&User{}).Create(&user01)
 	db.Model(&User{}).Create(&user02)
 	db.Model(&User{}).Create(&user03)
 
+	// Data::Category
+	category01 := Category{
+		Name: "Reviews",
+	}
+	category02 := Category{
+		Name: "Recipes",
+	}
+	category03 := Category{
+		Name: "Jobs",
+	}
+	category04 := Category{
+		Name: "Promote",
+	}
+	category05 := Category{
+		Name: "Ask",
+	}
+	db.Model(&Category{}).Create(&category01)
+	db.Model(&Category{}).Create(&category02)
+	db.Model(&Category{}).Create(&category03)
+	db.Model(&Category{}).Create(&category04)
+	db.Model(&Category{}).Create(&category05)
+
 	// Data::Post
 	post01 := Post{
 		Title:     "Yakiniku Like",
-		Subject:   "ปิ้งย่างคนโสด มีเตาส่วนตัวด้วย! Yakiniku Like เปิดใหม่ที่เซ็นลาด ร้านนี้ดังที่ญี่ปุ่นมากๆ เพราะราคาไม่แพง เป็นเนื้อย่างงบประหยัด แต่คุณภาพดีงาม ที่สำคัญเตาไร้ควัน กินแล้วหัวไม่เหม็นจ้าา ราคาเริ่มต้นเซ็ตละ 169 net ไม่มี++ อย่างเลิศ",
-		Image:     "",
+		Subject:   `{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"ปิ้งย่างคนโสด มีเตาส่วนตัวด้วย! ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","version":1,"tag":"h1"},{"children":[],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Yakiniku Like","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" เปิดใหม่ที่เซ็นลาด ร้านนี้ดังที่ญี่ปุ่นมากๆ เพราะราคาไม่แพง ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"เป็นเนื้อย่างงบประหยัด แต่คุณภาพดีงาม ที่สำคัญเตาไร้ควัน กินแล้วหัวไม่เหม็นจ้าา ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1},{"children":[{"altText":"URL image","caption":{"editorState":{"root":{"children":[],"direction":null,"format":"","indent":0,"type":"root","version":1}}},"height":0,"maxWidth":500,"showCaption":false,"src":"https://www.google.com/url?sa=i&url=https%3A%2F%2Ftwitter.com%2FBubblesxMakeup%2Fstatus%2F1479841823426183168&psig=AOvVaw0C0GHCLOJA9WOdzim3nAyw&ust=1685974960843000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCMCjzKfoqf8CFQAAAAAdAAAAABAE","type":"image","version":1,"width":0},{"altText":"URL image","caption":{"editorState":{"root":{"children":[],"direction":null,"format":"","indent":0,"type":"root","version":1}}},"height":0,"maxWidth":500,"showCaption":false,"src":"https://thestandard.co/wp-content/uploads/2021/11/Yakiniku-Like17.jpg","type":"image","version":1,"width":0}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Yakiniku Like","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Open: ตามเวลาศูนย์การค้า","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Address: ชั้น 1 ศูนย์การค้าเซ็นทรัลพลาซา ลาดพร้าว กรุงเทพฯ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Budget: 200-800 บาท","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Contact: –","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Website: ","type":"text","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"https://www.facebook.com/yakinikulike.th","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"link","version":1,"rel":null,"target":null,"title":null,"url":"https://www.facebook.com/yakinikulike.th"}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`,
+		Preview:   "ปิ้งย่างคนโสด มีเตาส่วนตัวด้วย! Yakiniku Like เปิดใหม่ที่เซ็นลาด ร้านนี้ดังที่ญี่ปุ่นมากๆ เพราะราคาไม่แพง เป็นเนื้อย่างงบประหยัด แต่คุณภาพดีงาม ที่สำคัญเตาไร้ควัน กินแล้วหัวไม่เหม็นจ้าา",
 		Create_at: time.Date(2023, 1, 1, 10, 10, 10, 0, time.Local),
 		Author:    user01,
+		Category:  category01,
 	}
 	post02 := Post{
 		Title:     "Cast Iron",
-		Subject:   "กลับมาแล้ววว เมนูที่ปีนึงมีครั้ง😍 เบอร์เกอร์ทรัฟเฟิลร้าน Cast Iron ตรงอารีย์ เราชอบเบอร์เกอร์ร้านนี้มากๆ กินบ่อยสุดๆ เมนูนี้เป็น Brie Truffle Burger ขูดทรัฟเฟิลสดๆลงไปจุกๆ ชีสก็เป็นรสทรัฟเฟิลนะ อร่อยยจิงจัง😋",
-		Image:     "",
+		Subject:   `{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"กลับมาแล้ววว เมนูที่ปีนึงมีครั้ง😍 ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"เบอร์เกอร์ทรัฟเฟิลร้าน Cast Iron ตรงอารีย์ ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","version":1,"tag":"h1"},{"children":[],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"เราชอบเบอร์เกอร์ร้านนี้มากๆ กินบ่อยสุดๆ ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"เมนูนี้เป็น ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"Brie Truffle Burger","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" ขูดทรัฟเฟิลสดๆลงไปจุกๆ ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"ชีสก็เป็นรสทรัฟเฟิลนะ ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":2,"mode":"normal","style":"","text":"อร่อยยจิงจัง","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"😋","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`,
+		Preview:   "กลับมาแล้ววว เมนูที่ปีนึงมีครั้ง😍 เบอร์เกอร์ทรัฟเฟิลร้าน Cast Iron ตรงอารีย์ เราชอบเบอร์เกอร์ร้านนี้มากๆ กินบ่อยสุดๆ เมนูนี้เป็น Brie Truffle Burger ขูดทรัฟเฟิลสดๆลงไปจุกๆ ชีสก็เป็นรสทรัฟเฟิลนะ อร่อยยจิงจัง😋",
 		Create_at: time.Date(2023, 3, 11, 12, 13, 14, 0, time.Local),
 		Author:    user02,
+		Category:  category01,
 	}
 	post03 := Post{
 		Title:     "น้ำแข็งไสสไตล์ญี่ปุ่น",
-		Subject:   "น้ำแข็งไสสไตล์ญี่ปุ่น เปิดสาขาใหม่สามย่านมิตรทาวน์ คิวยาวมากก น้ำแข็งเค้าเนียนนุ่มเกล็ดเป็นปุยๆดีจริง แถมราคาไม่แพง เริ่มต้นแค่ 49.- ชอบรสชาไทย มีบุกกรุบๆวิปครีม รสบับเบิ้ลกัมก็ดี คิดถีงตอนเด็กๆ",
-		Image:     "",
+		Subject:   `{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"น้ำแข็งไสสไตล์ญี่ปุ่น ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","version":1,"tag":"h1"},{"children":[{"detail":0,"format":2,"mode":"normal","style":"","text":"เปิดสาขาใหม่สามย่านมิตรทาวน์","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"คิวยาวมากก น้ำแข็งเค้าเนียนนุ่มเกล็ดเป็นปุยๆดีจริง ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"แถมราคาไม่แพง เริ่มต้นแค่ ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"49.-","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"ชอบรสชาไทย มี","type":"text","version":1},{"detail":0,"format":8,"mode":"normal","style":"","text":"บุกกรุบๆวิปครีม","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" รสบับเบิ้ลกัมก็ดี ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":2,"mode":"normal","style":"","text":"คิดถีงตอนเด็กๆ","type":"text","version":1},{"type":"linebreak","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`,
+		Preview:   "น้ำแข็งไสสไตล์ญี่ปุ่น เปิดสาขาใหม่สามย่านมิตรทาวน์ คิวยาวมากก น้ำแข็งเค้าเนียนนุ่มเกล็ดเป็นปุยๆดีจริง แถมราคาไม่แพง เริ่มต้นแค่ 49.- ชอบรสชาไทย มีบุกกรุบๆวิปครีม รสบับเบิ้ลกัมก็ดี คิดถีงตอนเด็กๆ",
 		Create_at: time.Now(),
 		Author:    user03,
+		Category:  category01,
 	}
 	db.Model(&Post{}).Create(&post01)
 	db.Model(&Post{}).Create(&post02)
