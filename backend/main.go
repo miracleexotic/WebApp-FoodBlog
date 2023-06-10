@@ -36,6 +36,7 @@ func main() {
 			protected.GET("/posts", controller.ListPosts)
 			protected.GET("/post/:id", controller.GetPost)
 			protected.GET("/posts/active", controller.ListPostsActiveUser)
+			protected.GET("/posts/category/:id", controller.ListPostByCategory)
 			protected.DELETE("/post/:id", controller.DeletePost)
 			protected.POST("/post", controller.CreatePost)
 			protected.PATCH("/post/:id", controller.UpdatePost)
@@ -55,6 +56,9 @@ func main() {
 			protected.GET("/emotion/comment/:id", controller.GetEmotionalComment)
 			protected.GET("/emotion/comment/:id/active", controller.GetEmotionalUserComment)
 			protected.PATCH("/emotion/comment/:id/active", controller.ToggleEmotionalComment)
+
+			// Route::Category
+			protected.GET("/category", controller.ListCategory)
 
 		}
 	}
