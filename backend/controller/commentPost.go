@@ -35,6 +35,11 @@ func CreateCommentPost(c *gin.Context) {
 		return
 	}
 
+	if comment.Comment == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Content is empty."})
+		return
+	}
+
 	var user entity.User
 	if err := entity.DB().Model(&entity.User{}).Where("email = ?", user_email).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
