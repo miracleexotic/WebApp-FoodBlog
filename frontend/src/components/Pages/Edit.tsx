@@ -56,7 +56,7 @@ function EditPage() {
 
   const initEditor = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
-  function handlePublicClick() {
+  function handleSaveClick() {
     let data = {
       ...post,
     };
@@ -75,9 +75,11 @@ function EditPage() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          localStorage.removeItem('postID');
-          window.location.href = "/profile"
           setSuccess(true);
+          setTimeout(() => {
+            localStorage.removeItem('postID');
+            window.location.href = "/profile"
+          }, 1500);
         } else {
           setError(true);
         }
@@ -163,7 +165,10 @@ function EditPage() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          setCategory(res.data);
+          setCategory((categories) => {
+            setPost({...post, Category: res.data[(post.Category?.ID != undefined ? +post.Category?.ID : 1) - 1]})
+            return res.data
+          });
         } else {
           // setError(true);
         }
@@ -215,7 +220,7 @@ function EditPage() {
                     size="small"
                     sx={{ height: 30 }}
                     color='secondary'
-                    onClick={handlePublicClick}
+                    onClick={handleSaveClick}
                   >
                     Save
                   </Button>

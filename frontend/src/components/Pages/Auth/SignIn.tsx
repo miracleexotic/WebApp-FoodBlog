@@ -80,10 +80,12 @@ function SignInPage() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          localStorage.setItem('token', res.data.token)
-          localStorage.setItem('id', res.data.id)
-          window.location.href = "/"
           setSuccess(true);
+          setTimeout(() => {
+            localStorage.setItem('token', res.data.token)
+            localStorage.setItem('id', res.data.id)
+            window.location.href = "/"
+          }, 1500);
         } else {
           setError(true);
         }

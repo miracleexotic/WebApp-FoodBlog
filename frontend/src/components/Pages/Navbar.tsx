@@ -160,7 +160,7 @@ function Navbar() {
     <div>
     <CssBaseline />
     <ThemeProvider theme={theme}>
-    <AppBar position="static" open={open}>
+    <AppBar position="fixed" open={open}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <IconButton

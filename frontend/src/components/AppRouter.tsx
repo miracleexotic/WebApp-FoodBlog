@@ -1,4 +1,5 @@
 import React from 'react';
+import Box from '@mui/material/Box';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -77,6 +78,7 @@ function AppRouter() {
   return (
     <div>
       <Navbar />
+      <Box sx={{marginBottom: 8}}></Box>
       <RouterProvider router={router}></RouterProvider>
     </div>
   );

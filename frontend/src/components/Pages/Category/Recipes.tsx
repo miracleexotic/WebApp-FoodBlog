@@ -22,7 +22,7 @@ function PostComponent(props: DataPostInterface) {
     bgcolor: 'background.paper',
     borderColor: 'text.primary',
     width: '700px',
-    height: '255px',
+    height: '260px',
     boxShadow: '1px 2px 9px #9999',
     margin: '2em',
     padding: '1em',
@@ -164,7 +164,7 @@ function PostComponent(props: DataPostInterface) {
             </IconButton>
           </Box>
         </Box>
-        <Typography variant='h4' sx={{ marginTop: 3, marginBottom: 1 }}>
+        <Typography variant='h4' sx={{ marginTop: 3, marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", height: '45px' }}>
           {props.Post.Title}
         </Typography>
         <Typography variant='body1' sx={{ overflow: "hidden", textOverflow: "ellipsis", height: '75px' }}>
@@ -173,8 +173,8 @@ function PostComponent(props: DataPostInterface) {
         <Box sx={{ display: 'flex' }}>
           <Chip 
             label={props.Post.Category.Name} 
-            sx={{ marginLeft: -0.75 }}
             onClick={() => window.location.href = `/${props.Post.Category.Name}`} 
+            sx={{ marginLeft: -0.75, background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)', color: '#fff'}}
           />
           <Box sx={{ flexGrow: 1 }} />
           <Button 

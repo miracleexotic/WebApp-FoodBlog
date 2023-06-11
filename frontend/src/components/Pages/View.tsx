@@ -16,6 +16,8 @@ import { useParams } from "react-router-dom";
 import Moment from 'moment';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
 
 import { UserInterface } from '../../models/IUser';
 import { PostInterface } from '../../models/IPost';
@@ -507,8 +509,10 @@ function ViewPage() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          window.location.reload()
           setCommentSuccess(true);
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500);
         } else {
           setCommentError(true);
         }
@@ -567,6 +571,13 @@ function ViewPage() {
                 </IconButton>
               </Box>
             </Box>
+            <Divider sx={{ marginTop: 1}}>
+              <Chip 
+                label={post?.Category.Name} 
+                onClick={() => window.location.href = `/${post?.Category.Name}`} 
+                sx={{background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)', color: '#fff'}}
+              />
+            </Divider>
             <Typography variant='h4' sx={{ marginTop: 3, marginBottom: 1 }}>
               {post?.Title}
             </Typography>

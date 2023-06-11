@@ -77,9 +77,11 @@ function AddPage() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          localStorage.removeItem('postID');
-          window.location.href = "/profile"
           setSuccess(true);
+          setTimeout(() => {
+            localStorage.removeItem('postID');
+            window.location.href = "/profile"
+          }, 1500);
         } else {
           setError(true);
         }

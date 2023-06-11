@@ -98,8 +98,10 @@ function SignUpPage() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          window.location.href = "/"
           setSuccess(true);
+          setTimeout(() => {
+            window.location.href = "/"
+          }, 1500);
         } else {
           setError(true);
         }

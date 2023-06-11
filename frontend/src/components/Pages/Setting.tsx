@@ -102,13 +102,15 @@ function SettingPage() {
                   .then((response) => response.json())
                   .then((res) => {
                     if (res.data) {
-                      if (confirmPassword && newPassword != "") {
-                        localStorage.clear();
-                        window.location.href = "/"
-                      } else {
-                        window.location.reload();
-                      }
                       setSuccess(true);
+                      setTimeout(() => {
+                        if (confirmPassword && newPassword != "") {
+                          localStorage.clear();
+                          window.location.href = "/"
+                        } else {
+                          window.location.reload();
+                        }
+                      }, 1500);
                     } else {
                       setError(true);
                     }
