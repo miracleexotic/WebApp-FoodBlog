@@ -44,6 +44,7 @@ func main() {
 			// Route::LikePost
 			protected.GET("/like/post/:id", controller.GetLikePost)
 			protected.GET("/like/user/:userID/post/:postID", controller.GetUserLikePost)
+			protected.GET("/like/user/:userID", controller.ListUserLikePosts)
 			protected.PATCH("/like/user/:userID/post/:postID", controller.ToggleLikePost)
 
 			// Route::CommentPost

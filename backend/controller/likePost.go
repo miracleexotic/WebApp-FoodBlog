@@ -36,6 +36,27 @@ func GetUserLikePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": likePost})
 }
 
+// GET /like/user/:userID
+// -- Like user that like all post.
+func ListUserLikePosts(c *gin.Context) {
+	user_id := c.Param("userID")
+	var likePosts []entity.LikePost
+
+	if err := entity.DB().
+		Preload("Post").
+		Preload("Post.Author").
+		Preload("Post.Category").
+		Preload("UserLike").
+		Order("created_at desc").
+		Where("user_like_id = ?", user_id).
+		Find(&likePosts).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": likePosts})
+}
+
 // PATCH /like/user/:userID/post/:postID
 // -- Toggle user like with post
 func ToggleLikePost(c *gin.Context) {
