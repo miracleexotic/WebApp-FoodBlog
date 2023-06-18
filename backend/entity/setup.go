@@ -128,7 +128,7 @@ func SetupDatabase() {
 			Preview:   pd.Data[i].Preview,
 			Create_at: time.Now(),
 			Author:    admin,
-			Category:  category01,
+			Category:  category02,
 		})
 	}
 
