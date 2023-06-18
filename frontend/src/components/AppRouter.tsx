@@ -9,7 +9,7 @@ import Navbar from './Pages/Navbar';
 import HomePage from './Pages/Home';
 import AddPage from './Pages/Add';
 import EditPage from './Pages/Edit';
-import ProfilePage from './Pages/Profile';
+import ProfilePage from './Pages/Profile/Profile';
 import SettingPage from './Pages/Setting';
 import ViewPage from './Pages/View';
 import ReviewsPage from './Pages/Category/Reviews';
