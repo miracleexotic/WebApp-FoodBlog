@@ -3,7 +3,7 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 
@@ -118,7 +118,7 @@ func SetupDatabase() {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	json.Unmarshal(byteValue, &pd)
 
 	for i := 0; i < len(pd.Data); i++ {
