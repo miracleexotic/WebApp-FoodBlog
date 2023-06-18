@@ -28,6 +28,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ArticleIcon from '@mui/icons-material/Article';
+import Settings from '@mui/icons-material/Settings';
+import Logout from '@mui/icons-material/Logout';
 
 import { CategoryInterface } from '../../models/ICategory';
 
@@ -151,9 +153,9 @@ function Navbar() {
   }, []);
 
   const settings = [
-    { title: 'Profile', onClick: () => {window.location.href = '/profile';} },
-    { title: 'Settings', onClick: () => {window.location.href = '/setting';} },
-    { title: 'Log out', onClick: () => {localStorage.clear(); window.location.href = '/';} }
+    { title: 'Profile', onClick: () => {window.location.href = '/profile';}, icon: <Avatar src={previewImage} /> },
+    { title: 'Settings', onClick: () => {window.location.href = '/setting';}, icon: <Settings fontSize="small" /> },
+    { title: 'Log out', onClick: () => {localStorage.clear(); window.location.href = '/';}, icon: <Logout fontSize="small" /> }
   ];
 
   return (
@@ -219,7 +221,14 @@ function Navbar() {
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: '45px' }}
+              sx={{ mt: '45px', 
+                '& .MuiAvatar-root': {
+                  width: 32,
+                  height: 32,
+                  ml: -0.5,
+                  mr: 1,
+                } 
+              }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -236,6 +245,9 @@ function Navbar() {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting.title} onClick={setting.onClick}>
+                  <ListItemIcon>
+                    {setting.icon}
+                  </ListItemIcon>
                   <Typography textAlign="center">{setting.title}</Typography>
                 </MenuItem>
               ))}
