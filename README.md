@@ -43,9 +43,11 @@ npm start
 #### Sign In
 ![Image Sign In](/assets/images/SignIn.png "SIGNIN")
 Default Credential
-1. Email: cherry.chadchada@gmail.com
+1. Email: admin@food.com
     Password: 123456
-2. Email: example.example@example.com
+2. Email: cherry.chadchada@gmail.com
     Password: 123456
-3. Email: test.test@test.com
+3. Email: example.example@example.com
+    Password: 123456
+4. Email: test.test@test.com
     Password: 123456
