@@ -8,6 +8,11 @@ import (
 	"github.com/miracleexotic/WebApp-FoodBlog/entity"
 )
 
+type PostWithLikeCount struct {
+	Post  entity.Post
+	Count int64
+}
+
 // GET /posts
 // -- List all posts.
 func ListPosts(c *gin.Context) {
@@ -52,8 +57,8 @@ func ListPostsActiveUser(c *gin.Context) {
 }
 
 // GET /posts/category/:id
-// -- List all post in category.
-func ListPostByCategory(c *gin.Context) {
+// -- List all post in category with like count.
+func ListPostByCategoryWithLikeCount(c *gin.Context) {
 	id := c.Param("id")
 	var posts []entity.Post
 
@@ -67,7 +72,84 @@ func ListPostByCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": posts})
+	var posts_likeCount []PostWithLikeCount
+
+	for i := 0; i < len(posts); i++ {
+		var count int64
+		if err := entity.DB().Model(&entity.LikePost{}).Where("post_id = ?", posts[i].ID).Count(&count).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		posts_likeCount = append(posts_likeCount, PostWithLikeCount{Post: posts[i], Count: count})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": posts_likeCount})
+}
+
+// GET /posts/like/count
+// -- List all post with like count.
+func ListPostWithLikeCount(c *gin.Context) {
+	var posts []entity.Post
+
+	if err := entity.DB().
+		Preload("Author").
+		Preload("Category").
+		Order("create_at desc").
+		Find(&posts).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var posts_likeCount []PostWithLikeCount
+
+	for i := 0; i < len(posts); i++ {
+		var count int64
+		if err := entity.DB().Model(&entity.LikePost{}).Where("post_id = ?", posts[i].ID).Count(&count).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		posts_likeCount = append(posts_likeCount, PostWithLikeCount{Post: posts[i], Count: count})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": posts_likeCount})
+}
+
+// GET /posts/like/count/active
+// -- List all post with like count.
+func ListPostWithLikeCountActiveUser(c *gin.Context) {
+	user_email, _ := c.Get("email")
+	var user entity.User
+	if err := entity.DB().Model(&entity.User{}).
+		Where("email = ?", user_email).
+		First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var posts []entity.Post
+
+	if err := entity.DB().
+		Preload("Author").
+		Preload("Category").
+		Order("create_at desc").
+		Where("author_id = ?", user.ID).
+		Find(&posts).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var posts_likeCount []PostWithLikeCount
+
+	for i := 0; i < len(posts); i++ {
+		var count int64
+		if err := entity.DB().Model(&entity.LikePost{}).Where("post_id = ?", posts[i].ID).Count(&count).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		posts_likeCount = append(posts_likeCount, PostWithLikeCount{Post: posts[i], Count: count})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": posts_likeCount})
 }
 
 // GET /post/:id
