@@ -36,7 +36,9 @@ func main() {
 			protected.GET("/posts", controller.ListPosts)
 			protected.GET("/post/:id", controller.GetPost)
 			protected.GET("/posts/active", controller.ListPostsActiveUser)
-			protected.GET("/posts/category/:id", controller.ListPostByCategory)
+			protected.GET("/posts/category/:id", controller.ListPostByCategoryWithLikeCount)
+			protected.GET("/posts/like/count", controller.ListPostWithLikeCount)
+			protected.GET("/posts/like/count/active", controller.ListPostWithLikeCountActiveUser)
 			protected.DELETE("/post/:id", controller.DeletePost)
 			protected.POST("/post", controller.CreatePost)
 			protected.PATCH("/post/:id", controller.UpdatePost)
@@ -44,7 +46,7 @@ func main() {
 			// Route::LikePost
 			protected.GET("/like/post/:id", controller.GetLikePost)
 			protected.GET("/like/user/:userID/post/:postID", controller.GetUserLikePost)
-			protected.GET("/like/user/:userID", controller.ListUserLikePosts)
+			protected.GET("/like/user/active", controller.ListUserLikePostsActiveUser)
 			protected.PATCH("/like/user/:userID/post/:postID", controller.ToggleLikePost)
 
 			// Route::CommentPost
