@@ -23,6 +23,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Pagination from '@mui/material/Pagination';
 
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -36,7 +37,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 
-import { PostInterface } from '../../../models/IPost';
+import { PostInterface, PostWithLikeCountInterface } from '../../../models/IPost';
 
 
 const theme = createTheme({
@@ -108,9 +109,9 @@ function Post(props: DataPostInterface) {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          // setSuccess(true);
+          console.log(res.data)
         } else {
-          // setError(true);
+          console.log(res)
         }
     });
   }
@@ -130,9 +131,8 @@ function Post(props: DataPostInterface) {
       .then((res) => {
         if (res.data) {
           setCountLike(res.data.length)
-          // setSuccess(true);
         } else {
-          // setError(true);
+          console.log(res)
         }
     });
   }
@@ -153,11 +153,9 @@ function Post(props: DataPostInterface) {
         if (res.data) {
           setLikeToggle(true)
           setLikeColor('pink')
-          // setSuccess(true);
         } else {
           setLikeToggle(false)
           setLikeColor('grey')
-          // setError(true);
         }
     });
   }
@@ -205,12 +203,10 @@ function Post(props: DataPostInterface) {
   }
 
   React.useEffect(() => {
-    if (props.Post.Author.Image != "") {
-      setPreviewPostAuthorImage(props.Post.Author.Image)
-    }
+    setPreviewPostAuthorImage(props.Post.Author.Image)
     getLike()
     isUserLikePost();
-  }, [])
+  }, [props])
 
   return (
     <>
@@ -259,6 +255,7 @@ function Post(props: DataPostInterface) {
         <Typography variant='body1' sx={{ overflow: "hidden", textOverflow: "ellipsis", height: '70px' }}>
           {props.Post.Preview}
         </Typography>
+
         <Box sx={{ display: 'flex', marginTop: 0.5 }} >
           <Chip 
             label={props.Post.Category.Name} 
@@ -299,6 +296,7 @@ function Post(props: DataPostInterface) {
             </Box>
           </ThemeProvider>
         </Box>
+
       </Box>
     </>
   )
@@ -314,10 +312,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 function PostComponent() {
 
-  const [posts, setPosts] = React.useState<PostInterface[]>([]);
+  const [posts_LikeCount, setPosts_LikeCount] = React.useState<PostWithLikeCountInterface[]>([]);
 
-  function getPosts() {
-    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/posts/active`;
+  function getPostsWithLikeCount() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/posts/like/count/active`;
     const requestOptions = {
       method: "GET",
       headers: {
@@ -330,13 +328,15 @@ function PostComponent() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          setPosts((post) => {
-            setFilteredList(res.data)
+          setPosts_LikeCount((posts_LikeCount) => {
+            setFilteredList([...res.data].filter((item: PostWithLikeCountInterface, idx: number) => {
+              return 0<=idx && idx<10
+            }))
             return res.data
           })
-          // setSuccess(true);
+          setPageCount(Math.floor(res.data.length / 10)+1)
         } else {
-          // setError(true);
+          console.log(res)
         }
       });
   }
@@ -363,44 +363,74 @@ function PostComponent() {
       Jobs: true,
       Promote: true,
       Ask: true,
-
+    },
+    By: {
+      Time: {
+        Last: true,
+      },
+      Popular: false
     }
   });
 
-  const [filteredList, setFilteredList] = React.useState(posts);
+  const [filteredList, setFilteredList] = React.useState(posts_LikeCount);
   function filterBySearch() {
-    var updatedList = [...posts];
-    updatedList = updatedList.filter((item: PostInterface) => {
+    var updatedList = [...posts_LikeCount]
+    if (query.By.Popular) {
+      updatedList.sort((a, b) => {return b.Count - a.Count})
+    } else {
+      if (!query.By.Time.Last) {
+        updatedList.sort((a, b) => {
+          return b.Post.Create_at > a.Post.Create_at ? -1 : 1
+        })
+      }
+    }
+    updatedList = updatedList.filter((item: PostWithLikeCountInterface) => {
       if (
-          ((query.From.Title   && item.Title.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1) ||
-           (query.From.Subject && item.Subject.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1)) &&
-         !((startDate != null  && Date.parse(startDate.toISOString()) > Date.parse(moment(item.Create_at).toISOString())) || 
-           (endDate   != null  && Date.parse(endDate.toISOString()) < Date.parse(moment(item.Create_at).toISOString())))
+          ((query.From.Title   && item.Post.Title.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1) ||
+           (query.From.Subject && item.Post.Subject.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1)) &&
+         !((startDate != null  && Date.parse(startDate.toISOString()) > Date.parse(moment(item.Post.Create_at).toISOString())) || 
+           (endDate   != null  && Date.parse(endDate.toISOString()) < Date.parse(moment(item.Post.Create_at).toISOString())))
          ) {
-            if ((query.Category.Reviews && item.Category.Name === "Reviews")) {
+            if ((query.Category.Reviews && item.Post.Category.Name === "Reviews")) {
               return true
-            } else if ((query.Category.Recipes && item.Category.Name === "Recipes")) {
+            } else if ((query.Category.Recipes && item.Post.Category.Name === "Recipes")) {
               return true
-            } else if ((query.Category.Jobs && item.Category.Name === "Jobs")) {
+            } else if ((query.Category.Jobs && item.Post.Category.Name === "Jobs")) {
               return true
-            } else if ((query.Category.Promote && item.Category.Name === "Promote")) {
+            } else if ((query.Category.Promote && item.Post.Category.Name === "Promote")) {
               return true
-            } else if ((query.Category.Ask && item.Category.Name === "Ask")) {
+            } else if ((query.Category.Ask && item.Post.Category.Name === "Ask")) {
               return true
             }
       }
       return false
     });
-    setFilteredList(updatedList);
+    if ((page*10) <= updatedList.length) {
+      setFilteredList(updatedList.filter((item: PostWithLikeCountInterface, idx: number) => {
+        return (page*10)-10 <= idx && idx < (page*10)
+      }))
+    } else {
+      setFilteredList(updatedList.filter((item: PostWithLikeCountInterface, idx: number) => {
+        return (page*10)-10 <= idx
+      }))
+    }
+    setPageCount(Math.floor(updatedList.length / 10)+1)
+    window.scrollTo(0, 0)
+  };
+
+  const [page, setPage] = React.useState(1);
+  const [pageCount, setPageCount] = React.useState(0);
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
   };
 
   React.useEffect(() => {
     filterBySearch();
-  }, [query, startDate, endDate]);
+  }, [query, startDate, endDate, page]);
 
   React.useEffect(() => {
-    getPosts()
-  }, [])
+    getPostsWithLikeCount();
+  }, []);
 
   return (
     <>
@@ -507,6 +537,43 @@ function PostComponent() {
                   </AccordionDetails>
                 </Accordion>
               </Box>  
+
+              <Box sx={{display: 'flex', marginTop: 1}}>
+                <Box sx={{ marginLeft: 1.5, marginTop: 1, width: '40%', textAlign: 'left' }}>
+                  <Typography>
+                    By
+                  </Typography>
+                </Box>
+                <Box>
+                  <FormControl component="fieldset"
+                    required
+                  >
+                    <FormGroup aria-label="position" row>
+                      <FormControlLabel
+                        value="Popular"
+                        control={<Checkbox 
+                          sx={{color: '#fff'}}
+                          onChange={(e: any) => setQuery({ ...query, By: {...query.By, Popular: !query.By.Popular }})}
+                          checked={query.By.Popular}
+                        />}
+                        label="Popular"
+                        labelPlacement="end"
+                      />
+                      <FormControlLabel
+                        value="Last Time"
+                        control={<Checkbox
+                          sx={{color: '#fff'}} 
+                          onChange={(e: any) => setQuery({ ...query, By: {...query.By, Time: {Last: !query.By.Time.Last}}})}
+                          checked={query.By.Time.Last}
+                        />}
+                        label="Last Time"
+                        labelPlacement="end"
+                      />
+                    </FormGroup>
+                    <FormHelperText sx={{color: '#fff'}}>*If not set, Show past time first.</FormHelperText>
+                  </FormControl>
+                </Box>
+              </Box>
           
               <Box sx={{display: 'flex', marginTop: 1}}>
                 <Box sx={{ marginLeft: 1.5, marginTop: 1, width: '40%', textAlign: 'left' }}>
@@ -634,9 +701,13 @@ function PostComponent() {
         </Box>
       </Box>
       
-      {filteredList.map((post: PostInterface) => 
-        <Post Post={post} />
+      {filteredList.map((data: PostWithLikeCountInterface) => 
+        <Post Post={data.Post} />
       )}
+
+      <Pagination count={pageCount} page={page} onChange={handlePageChange} 
+        sx={{display: 'flex', flexGrow: 1, margin: '2em', padding: '1em', justifyContent: 'center'}}
+      />
     </>
   );
 }

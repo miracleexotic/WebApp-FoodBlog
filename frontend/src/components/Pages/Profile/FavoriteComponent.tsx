@@ -3,26 +3,21 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Button from '@mui/material/Button';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import DeleteIcon from '@mui/icons-material/Delete';
 import Chip from '@mui/material/Chip';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { grey, red, blue } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import Moment from 'moment';
 import moment from 'moment';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Pagination from '@mui/material/Pagination';
 
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -37,19 +32,8 @@ import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 
 import { PostInterface } from '../../../models/IPost';
-import { LikePostInterface } from '../../../models/ILikePost';
+import { LikePostInterface, LikePostWithLikeCountInterface } from '../../../models/ILikePost';
 
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: blue[500],
-    },
-    secondary: {
-      main: red[500],
-    },
-  },
-});
 
 interface DataPostInterface {
   Post: PostInterface
@@ -109,9 +93,9 @@ function Post(props: DataPostInterface) {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          // setSuccess(true);
+          console.log(res.data)
         } else {
-          // setError(true);
+          console.log(res)
         }
     });
   }
@@ -131,9 +115,8 @@ function Post(props: DataPostInterface) {
       .then((res) => {
         if (res.data) {
           setCountLike(res.data.length)
-          // setSuccess(true);
         } else {
-          // setError(true);
+          console.log(res)
         }
     });
   }
@@ -154,11 +137,9 @@ function Post(props: DataPostInterface) {
         if (res.data) {
           setLikeToggle(true)
           setLikeColor('pink')
-          // setSuccess(true);
         } else {
           setLikeToggle(false)
           setLikeColor('grey')
-          // setError(true);
         }
     });
   }
@@ -167,68 +148,14 @@ function Post(props: DataPostInterface) {
     window.location.href = '/view/' + props.Post.ID;
   }
 
-  function handleEdit() {
-    window.location.href = '/edit/' + props.Post.ID;
-  }
-
-  const [deleteSuccess, setDeleteSuccess] = React.useState(false);
-  const [deleteError, setDeleteError] = React.useState(false);
-  const handleDeleteClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setDeleteSuccess(false);
-    setDeleteError(false);
-  };
-
-  function handleDelete() {
-    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/post/${props.Post.ID}`;
-    const requestOptions = {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
-      },
-    };
-
-    fetch(apiUrl, requestOptions)
-      .then((response) => response.json())
-      .then((res) => {
-        if (res.data) {
-          setDeleteSuccess(true);
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          setDeleteError(true);
-        }
-    });
-  }
-
   React.useEffect(() => {
-    if (props.Post.Author.Image != "") {
-      setPreviewPostAuthorImage(props.Post.Author.Image)
-    }
+    setPreviewPostAuthorImage(props.Post.Author.Image)
     getLike()
     isUserLikePost();
-  }, [])
+  }, [props])
 
   return (
     <>
-      <Snackbar open={deleteSuccess} autoHideDuration={6000} onClose={handleDeleteClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleDeleteClose} severity="success">
-          ลบโพสต์สำเร็จ
-        </Alert>
-      </Snackbar>
-      <Snackbar open={deleteError} autoHideDuration={6000} onClose={handleDeleteClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleDeleteClose} severity="error">
-          ลบโพสต์ไม่สำเร็จ
-        </Alert>
-      </Snackbar>
       <Box sx={{ ...commonStyles }}>
         <Box sx={{ display: 'flex' }}>
           <IconButton sx={{ p: 0 }}>
@@ -289,10 +216,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 function FavoriteComponent() {
 
-  const [likePosts, setLikePosts] = React.useState<LikePostInterface[]>([]);
+  const [likeposts_LikeCount, setLikePosts_LikeCount] = React.useState<LikePostWithLikeCountInterface[]>([]);
 
-  function getLikePosts() {
-    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/user/${localStorage.getItem('id')}`;
+  function getLikePostsWithLikeCount() {
+    const apiUrl = `${process.env.REACT_APP_BACKEND_API}/like/user/active`;
     const requestOptions = {
       method: "GET",
       headers: {
@@ -305,15 +232,15 @@ function FavoriteComponent() {
       .then((response) => response.json())
       .then((res) => {
         if (res.data) {
-          setLikePosts((likePosts) => {
-            setFilteredList(res.data.filter((item_likepost: LikePostInterface) => {
-              return item_likepost.Post.Author.ID.toString() != localStorage.getItem('id')
+          setLikePosts_LikeCount((likeposts_LikeCount) => {
+            setFilteredList([...res.data].filter((item: LikePostWithLikeCountInterface, idx: number) => {
+              return 0<=idx && idx<10
             }))
             return res.data
           })
-          // setSuccess(true);
+          setPageCount(Math.floor(res.data.length / 10)+1)
         } else {
-          // setError(true);
+          console.log(res)
         }
       });
   }
@@ -340,45 +267,74 @@ function FavoriteComponent() {
       Jobs: true,
       Promote: true,
       Ask: true,
-
+    },
+    By: {
+      Time: {
+        Last: true,
+      },
+      Popular: false
     }
   });
 
-  const [filteredList, setFilteredList] = React.useState(likePosts);
+  const [filteredList, setFilteredList] = React.useState(likeposts_LikeCount);
   function filterBySearch() {
-    var updatedList = [...likePosts];
-    updatedList = updatedList.filter((item_likepost: LikePostInterface) => {
-      const item = item_likepost.Post;
+    var updatedList = [...likeposts_LikeCount]
+    if (query.By.Popular) {
+      updatedList.sort((a, b) => {return b.Count - a.Count})
+    } else {
+      if (!query.By.Time.Last) {
+        updatedList.sort((a, b) => {
+          return b.LikePost.Post.Create_at > a.LikePost.Post.Create_at ? -1 : 1
+        })
+      }
+    }
+    updatedList = updatedList.filter((item: LikePostWithLikeCountInterface) => {
       if (
-          ((query.From.Title   && item.Title.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1) ||
-           (query.From.Subject && item.Subject.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1)) &&
-         !((startDate != null  && Date.parse(startDate.toISOString()) > Date.parse(moment(item.Create_at).toISOString())) || 
-           (endDate   != null  && Date.parse(endDate.toISOString()) < Date.parse(moment(item.Create_at).toISOString())))
+          ((query.From.Title   && item.LikePost.Post.Title.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1) ||
+           (query.From.Subject && item.LikePost.Post.Subject.toLowerCase().indexOf(query.Search.toLowerCase()) !== -1)) &&
+         !((startDate != null  && Date.parse(startDate.toISOString()) > Date.parse(moment(item.LikePost.Post.Create_at).toISOString())) || 
+           (endDate   != null  && Date.parse(endDate.toISOString()) < Date.parse(moment(item.LikePost.Post.Create_at).toISOString())))
          ) {
-            if ((query.Category.Reviews && item.Category.Name === "Reviews")) {
+            if ((query.Category.Reviews && item.LikePost.Post.Category.Name === "Reviews")) {
               return true
-            } else if ((query.Category.Recipes && item.Category.Name === "Recipes")) {
+            } else if ((query.Category.Recipes && item.LikePost.Post.Category.Name === "Recipes")) {
               return true
-            } else if ((query.Category.Jobs && item.Category.Name === "Jobs")) {
+            } else if ((query.Category.Jobs && item.LikePost.Post.Category.Name === "Jobs")) {
               return true
-            } else if ((query.Category.Promote && item.Category.Name === "Promote")) {
+            } else if ((query.Category.Promote && item.LikePost.Post.Category.Name === "Promote")) {
               return true
-            } else if ((query.Category.Ask && item.Category.Name === "Ask")) {
+            } else if ((query.Category.Ask && item.LikePost.Post.Category.Name === "Ask")) {
               return true
             }
       }
       return false
     });
-    setFilteredList(updatedList);
+    if ((page*10) <= updatedList.length) {
+      setFilteredList(updatedList.filter((item: LikePostWithLikeCountInterface, idx: number) => {
+        return (page*10)-10 <= idx && idx < (page*10)
+      }))
+    } else {
+      setFilteredList(updatedList.filter((item: LikePostWithLikeCountInterface, idx: number) => {
+        return (page*10)-10 <= idx
+      }))
+    }
+    setPageCount(Math.floor(updatedList.length / 10)+1)
+    window.scrollTo(0, 0)
+  };
+
+  const [page, setPage] = React.useState(1);
+  const [pageCount, setPageCount] = React.useState(0);
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
   };
 
   React.useEffect(() => {
     filterBySearch();
-  }, [query, startDate, endDate]);
+  }, [query, startDate, endDate, page]);
 
   React.useEffect(() => {
-    getLikePosts()
-  }, [])
+    getLikePostsWithLikeCount();
+  }, []);
 
   return (
     <>
@@ -485,6 +441,43 @@ function FavoriteComponent() {
                   </AccordionDetails>
                 </Accordion>
               </Box>  
+
+              <Box sx={{display: 'flex', marginTop: 1}}>
+                <Box sx={{ marginLeft: 1.5, marginTop: 1, width: '40%', textAlign: 'left' }}>
+                  <Typography>
+                    By
+                  </Typography>
+                </Box>
+                <Box>
+                  <FormControl component="fieldset"
+                    required
+                  >
+                    <FormGroup aria-label="position" row>
+                      <FormControlLabel
+                        value="Popular"
+                        control={<Checkbox 
+                          sx={{color: '#fff'}}
+                          onChange={(e: any) => setQuery({ ...query, By: {...query.By, Popular: !query.By.Popular }})}
+                          checked={query.By.Popular}
+                        />}
+                        label="Popular"
+                        labelPlacement="end"
+                      />
+                      <FormControlLabel
+                        value="Last Time"
+                        control={<Checkbox
+                          sx={{color: '#fff'}} 
+                          onChange={(e: any) => setQuery({ ...query, By: {...query.By, Time: {Last: !query.By.Time.Last}}})}
+                          checked={query.By.Time.Last}
+                        />}
+                        label="Last Time"
+                        labelPlacement="end"
+                      />
+                    </FormGroup>
+                    <FormHelperText sx={{color: '#fff'}}>*If not set, Show past time first.</FormHelperText>
+                  </FormControl>
+                </Box>
+              </Box>
           
               <Box sx={{display: 'flex', marginTop: 1}}>
                 <Box sx={{ marginLeft: 1.5, marginTop: 1, width: '40%', textAlign: 'left' }}>
@@ -612,9 +605,13 @@ function FavoriteComponent() {
         </Box>
       </Box>
       
-      {filteredList.map((likePost: LikePostInterface) => 
-        <Post Post={likePost.Post} />
+      {filteredList.map((data: LikePostWithLikeCountInterface) => 
+        <Post Post={data.LikePost.Post} />
       )}
+
+      <Pagination count={pageCount} page={page} onChange={handlePageChange} 
+        sx={{display: 'flex', flexGrow: 1, margin: '2em', padding: '1em', justifyContent: 'center'}}
+      />
     </>
   );
 }
