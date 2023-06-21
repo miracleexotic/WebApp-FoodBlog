@@ -6,3 +6,8 @@ export interface LikePostInterface {
     Post: PostInterface,
     UserLike: UserInterface
 }
+
+export interface LikePostWithLikeCountInterface {
+    LikePost: LikePostInterface,
+    Count: number
+}

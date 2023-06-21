@@ -11,3 +11,8 @@ export interface PostInterface {
     Author: UserInterface,
     Category: CategoryInterface
 }
+
+export interface PostWithLikeCountInterface {
+    Post: PostInterface,
+    Count: number
+}
