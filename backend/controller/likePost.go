@@ -36,10 +36,18 @@ func GetUserLikePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": likePost})
 }
 
-// GET /like/user/:userID
+// GET /like/user/active
 // -- Like user that like all post.
-func ListUserLikePosts(c *gin.Context) {
-	user_id := c.Param("userID")
+func ListUserLikePostsActiveUser(c *gin.Context) {
+	user_email, _ := c.Get("email")
+	var user entity.User
+	if err := entity.DB().Model(&entity.User{}).
+		Where("email = ?", user_email).
+		First(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var likePosts []entity.LikePost
 
 	if err := entity.DB().
@@ -48,13 +56,31 @@ func ListUserLikePosts(c *gin.Context) {
 		Preload("Post.Category").
 		Preload("UserLike").
 		Order("created_at desc").
-		Where("user_like_id = ?", user_id).
+		Where("user_like_id = ?", user.ID).
 		Find(&likePosts).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": likePosts})
+	type LikePostWithLikeCount struct {
+		LikePost entity.LikePost
+		Count    int64
+	}
+	var likeposts_likeCount []LikePostWithLikeCount
+
+	for i := 0; i < len(likePosts); i++ {
+		if likePosts[i].Post.Author.ID == user.ID {
+			continue
+		}
+		var count int64
+		if err := entity.DB().Model(&entity.LikePost{}).Where("post_id = ?", likePosts[i].Post.ID).Count(&count).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		likeposts_likeCount = append(likeposts_likeCount, LikePostWithLikeCount{LikePost: likePosts[i], Count: count})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": likeposts_likeCount})
 }
 
 // PATCH /like/user/:userID/post/:postID
