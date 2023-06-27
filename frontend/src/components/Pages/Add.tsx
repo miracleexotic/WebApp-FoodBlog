@@ -21,6 +21,14 @@ import { PostInterface } from '../../models/IPost';
 import { CategoryInterface } from '../../models/ICategory';
 import Editor from '../Editor/Editor';
 
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import AddIcon from '@mui/icons-material/Add';
+import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+import "../Pages/Styles/googlemap.css"
 
 const theme = createTheme({
   palette: {
@@ -60,7 +68,9 @@ function AddPage() {
     console.log(post)
     
     let data = {
-      ...post
+      ...post,
+      Lat: center.lat,
+      Lng: center.lng,
     };
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_API}/post`;
@@ -160,6 +170,17 @@ function AddPage() {
     getCategory();
   }, []);
 
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY!,
+  });
+
+  const [expanded, setExpanded] = React.useState<string | false>(false);
+  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded ? panel : false);
+  };
+
+  const [center, setCenter] = React.useState({ lat: 1, lng: 1 });
+
   return (
     <div>
       <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}
@@ -198,6 +219,7 @@ function AddPage() {
                     variant="contained"
                     size="small"
                     sx={{ height: 30 }}
+                    color='secondary'
                     onClick={handlePublicClick}
                   >
                     Public
@@ -236,6 +258,60 @@ function AddPage() {
             </Box>
             <Box >
               <Editor post={post} setPost={setPost} content={initEditor}/>
+            </Box>
+            <Box sx={{ marginTop: 1 }}>
+              <Accordion 
+                expanded={expanded === 'panel-Advanced-settings'} 
+                onChange={handleChange('panel-Advanced-settings')}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1bh-content"
+                  id="panel1bh-header"
+                >
+                  <AddIcon />
+                  <Typography sx={{ width: '50%', flexShrink: 0, marginLeft: 2 }}>
+                    Add Google Map
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', flexGrow: 1, width: '100%' }}>
+                    <FormControl variant="outlined" sx={{ display: 'flex', marginTop: 1, width: '50%', marginRight: -1 }}>
+                      <InputLabel htmlFor="Latitude">Latitude</InputLabel>
+                      <OutlinedInput
+                        id="Lat" 
+                        label="Latitude"
+                        type="text"
+                        required
+                        onChange={(e: any) => setCenter({...center, lat: Number(e.target.value)})}
+                      />
+                    </FormControl>
+                    <FormControl variant="outlined" sx={{ display: 'flex', marginTop: 1, width: '50%', marginLeft: 2 }}>
+                      <InputLabel htmlFor="Longitude">Longitude</InputLabel>
+                      <OutlinedInput
+                        id="Lng" 
+                        label="Longitude"
+                        type="text"
+                        required
+                        onChange={(e: any) => setCenter({...center, lng: Number(e.target.value)})}
+                      />
+                    </FormControl>
+                  </Box>
+
+                  <Box sx={{ width: 635, height: 200, marginTop: 1 }}>
+                    {!isLoaded || ((center.lat==1 || center.lat==0) && (center.lng==1 || center.lng==0)) ? ("") : (
+                      <GoogleMap
+                        mapContainerClassName="map-container"
+                        center={center}
+                        zoom={15}
+                      >
+                        <MarkerF position={center} />
+                      </GoogleMap>
+                    )}
+                  </Box>
+
+                </AccordionDetails>
+              </Accordion>
             </Box>
           </Box>
 

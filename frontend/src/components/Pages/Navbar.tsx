@@ -27,6 +27,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import HomeIcon from '@mui/icons-material/Home';
 import ArticleIcon from '@mui/icons-material/Article';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
@@ -199,6 +200,7 @@ function Navbar() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 color='secondary'
+                size="small"
                 onClick={() => {
                   localStorage.removeItem('postID'); 
                   window.location.href="/add";
@@ -276,6 +278,16 @@ function Navbar() {
       </DrawerHeader>
       <Divider />
       <List>
+        <ListItem key={0} disablePadding
+          onClick={() => window.location.href = `/`}
+        >
+          <ListItemButton>
+            <ListItemIcon>
+              <HomeIcon />
+            </ListItemIcon>
+            <ListItemText primary={'Home'} />
+          </ListItemButton>
+        </ListItem>
         {categories.map((category: CategoryInterface) => (
           <ListItem key={category.ID} disablePadding
             onClick={() => window.location.href = `/${category.Name}`}

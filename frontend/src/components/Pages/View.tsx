@@ -24,6 +24,9 @@ import { PostInterface } from '../../models/IPost';
 import { CommentPostInterface } from '../../models/ICommentPost';
 import Viewer from '../Editor/Viewer';
 
+import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+import "../Pages/Styles/googlemap.css"
+
 
 interface DataCommentInterface {
   Comment: CommentPostInterface
@@ -331,6 +334,12 @@ function ViewPage() {
     });
   }
 
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY!,
+  });
+
+  const [center, setCenter] = React.useState({ lat: 1, lng: 1 });
+
   const [post, setPost] = React.useState<PostInterface>();
   const [previewPostAuthorImage, setPreviewPostAuthorImage] = React.useState<string>("/static/images/avatar/2.jpg");
   const [previewPostImage, setPreviewPostImage] = React.useState<string>("");
@@ -348,6 +357,7 @@ function ViewPage() {
     fetch(apiUrl, requestOptions)
       .then((response) => response.json())
       .then((res) => {
+        console.log(res.data)
         if (res.data) {
           setPost((post) => {
             if (res.data.Author.Image != "") {
@@ -358,6 +368,7 @@ function ViewPage() {
             }
             return res.data
           })
+          setCenter({lat: res.data.Lat, lng: res.data.Lng})
           // setSuccess(true);
         } else {
           // setError(true);
@@ -586,6 +597,17 @@ function ViewPage() {
               <img width="200" src={previewPostImage} />
             </Box>
             <Viewer />
+            <Box sx={{ width: 635, height: 200, marginTop: 1 }}>
+              {!isLoaded || ((post?.Lat==1 || post?.Lat==0) && (post.Lng==1 || post.Lng==0)) ? ("") : (
+                <GoogleMap
+                  mapContainerClassName="map-container"
+                  center={center}
+                  zoom={15}
+                >
+                  <MarkerF position={center} />
+                </GoogleMap>
+              )}
+            </Box>
           </Box>
 
           <Box sx={{ marginLeft: '2em' }}>

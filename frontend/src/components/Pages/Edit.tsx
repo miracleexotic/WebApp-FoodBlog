@@ -20,6 +20,16 @@ import { PostInterface } from '../../models/IPost';
 import { CategoryInterface } from '../../models/ICategory';
 import Editor from '../Editor/Editor';
 
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import AddIcon from '@mui/icons-material/Add';
+import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+import "../Pages/Styles/googlemap.css"
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -59,6 +69,8 @@ function EditPage() {
   function handleSaveClick() {
     let data = {
       ...post,
+      Lat: center.lat,
+      Lng: center.lng,
     };
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_API}/post/${editID}`;
@@ -85,6 +97,17 @@ function EditPage() {
         }
       });
   }
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY!,
+  });
+
+  const [center, setCenter] = React.useState({ lat: 1, lng: 1 });
+
+  const [expanded, setExpanded] = React.useState<string | false>("panel-Advanced-settings");
+  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const [post, setPost] = React.useState<Partial<PostInterface>>({});
 
@@ -117,6 +140,7 @@ function EditPage() {
             }
             return {...user, ...res.data}
           })
+          getPost();
         } else {
           // setError(true);
         }
@@ -138,6 +162,11 @@ function EditPage() {
       .then((res) => {
         if (res.data) {
           setPost({...post, ...res.data})
+          setCenter({lat: res.data.Lat, lng: res.data.Lng})
+          if (res.data.Lat==0 && res.data.Lng==0) {
+            setExpanded(false)
+          }
+          setSelectCategory(res.data.Category.ID)
         } else {
           // setError(true);
         }
@@ -145,10 +174,12 @@ function EditPage() {
   }
 
   const [categories, setCategory] = React.useState<CategoryInterface[]>([]);
+  const [selectCategory, setSelectCategory] = React.useState(0);
 
   function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const { value } = e.target;
     setPost({...post, Category: categories[+value - 1]});
+    setSelectCategory(+value - 1)
   };
 
   function getCategory() {
@@ -166,7 +197,7 @@ function EditPage() {
       .then((res) => {
         if (res.data) {
           setCategory((categories) => {
-            setPost({...post, Category: res.data[(post.Category?.ID != undefined ? +post.Category?.ID : 1) - 1]})
+            setPost({...post, Category: res.data[(post?.Category?.ID != undefined ? +post?.Category?.ID : 1) - 1]})
             return res.data
           });
         } else {
@@ -177,7 +208,6 @@ function EditPage() {
 
   React.useEffect(() => {
     getUser();
-    getPost();
     getCategory();
   }, []);
 
@@ -246,7 +276,7 @@ function EditPage() {
               >
                 <NativeSelect
                   id="Category"
-                  defaultValue={post.Category?.ID}
+                  defaultValue={selectCategory}
                   onChange={handleCategoryChange}
                 >
                   {categories.map((category: CategoryInterface) => 
@@ -257,6 +287,62 @@ function EditPage() {
             </Box>
             <Box >
               <Editor post={post} setPost={setPost} content={initEditor}/>
+            </Box>
+            <Box sx={{ marginTop: 1 }}>
+              <Accordion 
+                expanded={expanded === 'panel-Advanced-settings'} 
+                onChange={handleChange('panel-Advanced-settings')}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1bh-content"
+                  id="panel1bh-header"
+                >
+                  <AddIcon />
+                  <Typography sx={{ width: '50%', flexShrink: 0, marginLeft: 2 }}>
+                    Add Google Map
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', flexGrow: 1, width: '100%' }}>
+                    <FormControl variant="outlined" sx={{ display: 'flex', marginTop: 1, width: '50%', marginRight: -1 }}>
+                      <InputLabel htmlFor="Latitude">Latitude</InputLabel>
+                      <OutlinedInput
+                        id="Lat" 
+                        label="Latitude"
+                        type="text"
+                        value={center.lat}
+                        required
+                        onChange={(e: any) => setCenter({...center, lat: Number(e.target.value)})}
+                      />
+                    </FormControl>
+                    <FormControl variant="outlined" sx={{ display: 'flex', marginTop: 1, width: '50%', marginLeft: 2 }}>
+                      <InputLabel htmlFor="Longitude">Longitude</InputLabel>
+                      <OutlinedInput
+                        id="Lng" 
+                        label="Longitude"
+                        type="text"
+                        value={center.lng}
+                        required
+                        onChange={(e: any) => setCenter({...center, lng: Number(e.target.value)})}
+                      />
+                    </FormControl>
+                  </Box>
+
+                  <Box sx={{ width: 635, height: 200, marginTop: 1 }}>
+                    {!isLoaded || ((center.lat==1 || center.lat==0) && (center.lng==1 || center.lng==0)) ? ("") : (
+                      <GoogleMap
+                        mapContainerClassName="map-container"
+                        center={center}
+                        zoom={15}
+                      >
+                        <MarkerF position={center} />
+                      </GoogleMap>
+                    )}
+                  </Box>
+
+                </AccordionDetails>
+              </Accordion>
             </Box>
           </Box>
 
