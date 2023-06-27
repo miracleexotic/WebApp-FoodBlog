@@ -7,6 +7,8 @@ export interface PostInterface {
     Preview: string,
     Subject: string,
     Image: string,
+    Lat: number,
+    Lng: number,
     Create_at: Date,
     Author: UserInterface,
     Category: CategoryInterface

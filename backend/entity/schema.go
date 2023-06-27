@@ -35,6 +35,8 @@ type Post struct {
 	Title     string
 	Preview   string
 	Subject   string
+	Lat       float64
+	Lng       float64
 	Create_at time.Time
 
 	// AuthorID ทำหน้าที่เป็น FK
