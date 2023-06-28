@@ -597,8 +597,8 @@ function ViewPage() {
               <img width="200" src={previewPostImage} />
             </Box>
             <Viewer />
-            <Box sx={{ width: 635, height: 200, marginTop: 1 }}>
-              {!isLoaded || ((post?.Lat==1 || post?.Lat==0) && (post.Lng==1 || post.Lng==0)) ? ("") : (
+            {!isLoaded || ((post?.Lat==1 || post?.Lat==0) && (post.Lng==1 || post.Lng==0)) ? ("") : (
+              <Box sx={{ width: 635, height: 200, marginTop: 1 }}>
                 <GoogleMap
                   mapContainerClassName="map-container"
                   center={center}
@@ -606,8 +606,8 @@ function ViewPage() {
                 >
                   <MarkerF position={center} />
                 </GoogleMap>
-              )}
-            </Box>
+              </Box>
+            )}
           </Box>
 
           <Box sx={{ marginLeft: '2em' }}>
