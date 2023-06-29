@@ -297,7 +297,7 @@ function PostComponent(props: {PageName: string}) {
     },
     By: {
       Time: {
-        Last: true,
+        Past: false,
       },
       Popular: false
     }
@@ -309,7 +309,7 @@ function PostComponent(props: {PageName: string}) {
     if (query.By.Popular) {
       updatedList.sort((a, b) => {return b.Count - a.Count})
     } else {
-      if (!query.By.Time.Last) {
+      if (query.By.Time.Past) {
         updatedList.sort((a, b) => {
           return b.Post.Create_at > a.Post.Create_at ? -1 : 1
         })
@@ -477,17 +477,17 @@ function PostComponent(props: {PageName: string}) {
                             labelPlacement="end"
                           />
                           <FormControlLabel
-                            value="Last Time"
+                            value="Past Time"
                             control={<Checkbox
                               sx={{color: '#fff'}} 
-                              onChange={(e: any) => setQuery({ ...query, By: {...query.By, Time: {Last: !query.By.Time.Last}}})}
-                              checked={query.By.Time.Last}
+                              onChange={(e: any) => setQuery({ ...query, By: {...query.By, Time: {Past: !query.By.Time.Past}}})}
+                              checked={query.By.Time.Past}
                             />}
-                            label="Last Time"
+                            label="Past Time"
                             labelPlacement="end"
                           />
                         </FormGroup>
-                        <FormHelperText sx={{color: '#fff'}}>*If not set, Show past time first.</FormHelperText>
+                        <FormHelperText sx={{color: '#fff'}}>*If not set, Show last time first.</FormHelperText>
                       </FormControl>
                     </Box>
                   </Box>

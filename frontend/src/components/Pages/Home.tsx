@@ -233,7 +233,7 @@ function HomePage() {
       .then((res) => {
         if (res.data) {
           setPosts_LikeCount((posts_LikeCount) => {
-            setFilteredList([...res.data].sort((a, b) => {return b.Count - a.Count}).filter((item: PostWithLikeCountInterface, idx: number) => {
+            setFilteredList([...res.data].filter((item: PostWithLikeCountInterface, idx: number) => {
               return 0<=idx && idx<10
             }))
             return res.data.filter((item: PostWithLikeCountInterface) => {
@@ -275,9 +275,9 @@ function HomePage() {
     },
     By: {
       Time: {
-        Last: false,
+        Past: false,
       },
-      Popular: true
+      Popular: false
     }
   });
 
@@ -287,7 +287,7 @@ function HomePage() {
     if (query.By.Popular) {
       updatedList.sort((a, b) => {return b.Count - a.Count})
     } else {
-      if (!query.By.Time.Last) {
+      if (query.By.Time.Past) {
         updatedList.sort((a, b) => {
           return b.Post.Create_at > a.Post.Create_at ? -1 : 1
         })
@@ -461,24 +461,24 @@ function HomePage() {
                           value="Popular"
                           control={<Checkbox 
                             sx={{color: '#fff'}}
-                            onChange={(e: any) => setQuery({ ...query, By: {...query.By, Popular: !query.By.Popular }})}
+                            onChange={(e: any) => setQuery({ ...query, By: { ...query.By, Popular: !query.By.Popular }})}
                             checked={query.By.Popular}
                           />}
                           label="Popular"
                           labelPlacement="end"
                         />
                         <FormControlLabel
-                          value="Last Time"
+                          value="Past Time"
                           control={<Checkbox
                             sx={{color: '#fff'}} 
-                            onChange={(e: any) => setQuery({ ...query, By: {...query.By, Time: {Last: !query.By.Time.Last}}})}
-                            checked={query.By.Time.Last}
+                            onChange={(e: any) => setQuery({ ...query, By: { ...query.By, Time: { Past: !query.By.Time.Past }}})}
+                            checked={query.By.Time.Past}
                           />}
-                          label="Last Time"
+                          label="Past Time"
                           labelPlacement="end"
                         />
                       </FormGroup>
-                      <FormHelperText sx={{color: '#fff'}}>*If not set, Show past time first.</FormHelperText>
+                      <FormHelperText sx={{color: '#fff'}}>*If not set, Show last time first.</FormHelperText>
                     </FormControl>
                   </Box>
                 </Box>
